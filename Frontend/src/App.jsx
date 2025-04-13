@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 
+function getFormattedDate(date) {
+  return `Today, ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+}
+
 function App() {
   const [notes, setNotes] = useState([]);
 
@@ -16,20 +20,17 @@ function App() {
 
   useEffect(() => {
     fetchData()
-  }, [notes])
+  }, [])
 
   // To delete the data on the basis of _ID
-  function handleDelete(id) {
+  async function handleDelete(id) {
     try {
-      axios.delete(`http://localhost:3000/${id}`);
-      fetchData()
+      await axios.delete(`http://localhost:3000/${id}`);
+      fetchData();
     } catch (error) {
       console.log("Error while deleting", error);
     }
   }
-
-
-
 
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -61,7 +62,7 @@ function App() {
   const handleAddNote = async () => {
     if (newNote.title.trim() !== '' && newNote.content.trim() !== '') {
       const currentDate = new Date();
-      const formattedDate = `Today, ${currentDate.getHours()}:${currentDate.getMinutes() < 10 ? '0' : ''}${currentDate.getMinutes()} ${currentDate.getHours() >= 12 ? 'PM' : 'AM'}`;
+      const formattedDate = getFormattedDate(currentDate);
 
       const newNoteObject = {
         id: Date.now(),
@@ -214,7 +215,7 @@ function App() {
                     </svg>
                   </button>
                   <button
-                    onClick={() => { handleDelete(note._id), console.log(note._id) }}
+                    onClick={() => handleDelete(note._id)}
                     className="text-gray-400 hover:text-gray-600">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -231,7 +232,7 @@ function App() {
           ))}
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
