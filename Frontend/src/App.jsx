@@ -1,41 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
+import axios from 'axios';
 
 function App() {
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      title: 'Meeting Notes',
-      content: 'Discuss project timeline and deliverables with the team',
-      category: 'Work',
-      color: 'bg-amber-200',
-      date: 'Today, 2:30 PM'
-    },
-    {
-      id: 2,
-      title: 'Shopping List',
-      content: 'Milk, Eggs, Bread, Fruits, Vegetables',
-      category: 'Personal',
-      color: 'bg-emerald-200',
-      date: 'Yesterday, 6:15 PM'
-    },
-    {
-      id: 3,
-      title: 'Book Recommendations',
-      content: '1. Atomic Habits\n2. Deep Work\n3. The Psychology of Money',
-      category: 'Learning',
-      color: 'bg-violet-200',
-      date: 'Apr 10, 10:45 AM'
-    },
-    {
-      id: 4,
-      title: 'Project Ideas',
-      content: 'Build a personal portfolio website with React and Tailwind',
-      category: 'Work',
-      color: 'bg-amber-200',
-      date: 'Apr 9, 4:20 PM'
+  const [notes, setNotes] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const getDb = await axios.get('http://localhost:3000/');
+      // console.log(getDb.data.notesData);
+      setNotes(getDb.data.notesData)
+    } catch (error) {
+      console.error('Error fetching notes:', error);
     }
-  ]);
+  }
+
+  fetchData()
+  useEffect(() => {
+  }, [])
+
+
+
+
 
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -77,7 +63,7 @@ function App() {
 
       setNotes([newNoteObject, ...notes]);
       setNewNote({
-        title: '',  
+        title: '',
         content: '',
         category: 'Personal',
         color: 'bg-emerald-200'
