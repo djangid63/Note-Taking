@@ -4,6 +4,7 @@ const cors = require('cors')
 const app = express()
 const port = 3000;
 app.use(cors())
+app.use(express.json())
 
 const mongoURL = 'mongodb://localhost:27017/notesData'
 
@@ -23,6 +24,7 @@ const notesSchema = new Schema({
 
 const notesDataSchema = mongoose.model("notes", notesSchema)
 
+// To display the data
 app.get('/', async (req, res) => {
   try {
     const notesData = await notesDataSchema.find();
@@ -31,6 +33,29 @@ app.get('/', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch notes data" });
   }
 });
+
+// To delete the data on the basis of id
+app.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    await notesDataSchema.findByIdAndDelete(id)
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    res.status(500).json({ error: "Failed to delete the note" });
+  }
+})
+
+// To add the data
+app.post('/', async (req, res) => {
+  try {
+    const newNote = new notesDataSchema(req.body);
+    const savedNote = await newNote.save()
+    res.status(201).json({ message: "Note successfully saved", savedNote });
+    res.status(201).json({ newNote: savedNote });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to save the note" });
+  }
+})
 
 
 app.listen(port, () => {
