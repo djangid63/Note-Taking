@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const express = require('express')
+const express = require('express');
+const { strict } = require('assert');
 const app = express("express")
 const port = 3000;
 
@@ -15,6 +16,7 @@ const notesSchema = new Schema({
   id: Number,
   title: String,
   content: String,
+  category: String,
   color: String,
   date: String
 })

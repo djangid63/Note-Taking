@@ -8,6 +8,7 @@ function getFormattedDate(date) {
 
 function App() {
   const [notes, setNotes] = useState([]);
+  const [searchStr, setSearchStr] = useState('')
 
   const fetchData = async () => {
     try {
@@ -22,15 +23,42 @@ function App() {
     fetchData()
   }, [])
 
+
   // To delete the data on the basis of _ID
   async function handleDelete(id) {
     try {
       await axios.delete(`http://localhost:3000/${id}`);
-      fetchData();
+
     } catch (error) {
       console.log("Error while deleting", error);
     }
   }
+
+  // To update the data
+  const [editingNote, setEditingNote] = useState(null);
+
+  const updateNote = async (id, updatedNote) => {
+    try {
+      const response = await axios.patch(`http://localhost:3000/${id}`, updatedNote);
+      console.log('Updated Note:', response.data);
+
+      //  Show the new updated data
+      fetchData()
+    } catch (error) {
+      console.error('Error updating note:', error);
+    }
+  };
+
+  const handleEditClick = (note) => {
+    setEditingNote(note);
+  };
+
+  const handleSaveClick = async () => {
+    if (editingNote) {
+      await updateNote(editingNote._id, editingNote);
+      setEditingNote(null);
+    }
+  };
 
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -45,6 +73,7 @@ function App() {
   // State for showing note form
   const [showNoteForm, setShowNoteForm] = useState(false);
 
+
   // Categories with counts
   const categories = [
     { name: 'All', count: notes.length, icon: '📋' },
@@ -57,6 +86,11 @@ function App() {
   const filteredNotes = activeCategory === 'All'
     ? notes
     : notes.filter(note => note.category === activeCategory);
+
+  // Searching
+  const searchedData = filteredNotes.filter((note) =>
+    searchStr != "" ? note.title.toLowerCase().includes(searchStr.toLowerCase()) : filteredNotes
+  );
 
   // Handle adding new note
   const handleAddNote = async () => {
@@ -75,8 +109,10 @@ function App() {
       } catch (error) {
         console.error("Error while posting", error);
       }
-
+      // Use this for not re-rendering the whole notes obj
       setNotes([newNoteObject, ...notes]);
+      // Or use this
+      // fetchData()
       setNewNote({
         title: '',
         content: '',
@@ -134,6 +170,8 @@ function App() {
             <input
               type="text"
               placeholder="Search notes..."
+              value={searchStr}
+              onChange={(e) => { setSearchStr(e.target.value) }}
               className="pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <svg className="w-4 h-4 absolute left-2.5 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -204,12 +242,14 @@ function App() {
 
         {/* Notes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredNotes.map(note => (
+          {searchedData.map(note => (
             <div key={note.id} className={`${note.color} rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow`}>
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-medium text-lg text-gray-800">{note.title}</h3>
                 <div className="flex space-x-1">
-                  <button className="text-gray-400 hover:text-gray-600">
+                  <button
+                    onClick={() => handleEditClick(note)}
+                    className="text-gray-400 hover:text-gray-600">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
@@ -231,6 +271,66 @@ function App() {
             </div>
           ))}
         </div>
+
+        {/* Edit Note Form */}
+        {editingNote && (
+          <div className="my-4 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Note title"
+                value={editingNote.title}
+                onChange={(e) => setEditingNote({ ...editingNote, title: e.target.value })}
+                className="w-full border-0 border-b border-gray-200 pb-2 text-xl font-medium placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <textarea
+                placeholder="Note content..."
+                value={editingNote.content}
+                onChange={(e) => setEditingNote({ ...editingNote, content: e.target.value })}
+                className="w-full border-0 resize-none h-24 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <select
+                  value={editingNote.category}
+                  onChange={(e) => setEditingNote({ ...editingNote, category: e.target.value })}
+                  className="border border-gray-200 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                >
+                  <option value="Work">Work</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Learning">Learning</option>
+                </select>
+                <div className="flex space-x-1">
+                  {['bg-amber-200', 'bg-emerald-200', 'bg-violet-200', 'bg-rose-200', 'bg-sky-200'].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setEditingNote({ ...editingNote, color })}
+                      className={`w-5 h-5 rounded-full ${color} ${editingNote.color === color ? 'ring-2 ring-blue-500' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setEditingNote(null)}
+                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveClick}
+                  disabled={!editingNote.title || !editingNote.content}
+                  className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

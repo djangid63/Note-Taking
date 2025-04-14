@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const cors = require('cors')
+const cors = require('cors');
+const { notDeepEqual } = require('assert');
 const app = express()
 const port = 3000;
 app.use(cors())
@@ -18,6 +19,7 @@ const notesSchema = new Schema({
   id: Number,
   title: String,
   content: String,
+  category: String,
   color: String,
   date: String
 })
@@ -57,6 +59,20 @@ app.post('/', async (req, res) => {
   }
 })
 
+// To update the data
+app.patch('/:id', async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const updatedNote = await notesDataSchema.findByIdAndUpdate(
+      req.params.id,
+      { title, content },
+      { new: true }
+    );
+    res.json(updatedNote);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update note' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`It's running on ${port} server`);
