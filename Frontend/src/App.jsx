@@ -127,15 +127,16 @@ function App() {
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div className="w-64 p-6 bg-white shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-800">Notes</h1>
+        <h1 className="text-3xl font-bold text-gray-800">MindMark</h1>
         <p className="text-gray-500 text-sm mt-1">Keep your thoughts organized</p>
-
-        <button
-          onClick={() => setShowNoteForm(true)}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-        >
-          <span className="text-lg">+</span> New Note
-        </button>
+        <div className='flex items-center justify-center'>
+          <button
+            onClick={() => setShowNoteForm(true)}
+            className="mt-6 w-12 h-12 rounded-full bg-black hover:bg-blue-700 text-white py-2 px-4 flex items-center justify-center transition-colors"
+          >
+            <span className="text-3xl mb-1.5 font-extralight ">+</span>
+          </button>
+        </div>
 
         <div className="mt-8">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Categories</h2>
