@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './App.css';
 import axios from 'axios';
 
 function getFormattedDate(date) {
@@ -19,16 +18,19 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  // useEffect(() => {
+  // }, [notes])
 
+  // useEffect(() => {
+  //   fetchData()
+  // }, [notes])
+
+  // console.log("hiii");
 
   // To delete the data on the basis of _ID
   async function handleDelete(id) {
     try {
       await axios.delete(`http://localhost:3000/${id}`);
-
     } catch (error) {
       console.log("Error while deleting", error);
     }
@@ -132,7 +134,7 @@ function App() {
         <div className='flex items-center justify-center'>
           <button
             onClick={() => setShowNoteForm(true)}
-            className="mt-6 w-12 h-12 rounded-full bg-black hover:bg-blue-700 text-white py-2 px-4 flex items-center justify-center transition-colors"
+            className="mt-6 w-12 h-12 rounded-full bg-black hover:animate-spin hover:bg-white hover:text-black hover:border-[1px] border-black text-white py-2 px-4 flex items-center justify-center transition-colors"
           >
             <span className="text-3xl mb-1.5 font-extralight ">+</span>
           </button>
